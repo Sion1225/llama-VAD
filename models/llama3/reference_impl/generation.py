@@ -325,6 +325,20 @@ class Llama:
             )
 
         return ChatPrediction(generation=message)
+    
+    def extract_attention_scores(
+        self,
+        prompt: str,
+    ) -> torch.Tensor:
+        prompt_tokens = self.tokenizer.encode(prompt, bos=True, eos=False)
+        
+        tokens = torch.tensor([prompt_tokens], dtype=torch.long, device="cuda")
+
+        _ = self.model(tokens, start_pos=0)
+
+        last_attention_scores = self.model.layers[-1].attention.attention_scores
+
+        return last_attention_scores
 
 
 def sample_top_p(probs, p):
